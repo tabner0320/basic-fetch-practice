@@ -1,58 +1,54 @@
-const API_URL = 'https://dan-collins-dev.github.io/dummy-data-fetching-repo/data/users.json';
-const container = document.getElementById('card-container');
-const loading = document.getElementById('loading');
+const userContainer = document.getElementById("userContainer");
+const getUsersBtn = document.getElementById("getUsers");
+const getFilteredUsersBtn = document.getElementById("getFilteredUsers");
+const clearUsersBtn = document.getElementById("clearUsers");
 
-// Utility: Show/Hide Loading Message
-function showLoading() {
-  loading.style.display = 'block';
-}
+const DATA_URL = "https://dan-collins-dev.github.io/dummy-data-fetching-repo/data/users.json";
 
-function hideLoading() {
-  loading.style.display = 'none';
-}
-
-async function fetchUsers() {
+// Fetch and render users
+async function fetchUsers(filterTenYears = false) {
   try {
-    showLoading();
-    const res = await fetch(API_URL);
-    const data = await res.json();
-    hideLoading();
-    return data;
+    const response = await fetch(DATA_URL);
+    if (!response.ok) throw new Error("Network response was not ok");
+    const users = await response.json();
+
+    // Optional filtering
+    const filteredUsers = filterTenYears
+      ? users.filter(user => user.years_employed < 10)
+      : users;
+
+    displayUsers(filteredUsers);
   } catch (error) {
-    hideLoading();
-    alert('Failed to fetch users. Please try again.');
+    console.error("Fetch error:", error);
   }
 }
 
-function createCard(user) {
-  const card = document.createElement('div');
-  card.classList.add('user-card');
-  card.innerHTML = `
-    <h2>${user.name}</h2>
-    <p><strong>Company:</strong> ${user.company.name}</p>
-    <p><strong>Email:</strong> ${user.email}</p>
-    <p><strong>Years Employed:</strong> ${user.company.years_employed}</p>
-  `;
-  container.appendChild(card);
+// Dynamically create user cards
+function displayUsers(users) {
+  clearUsers();
+  users.forEach(user => {
+    const card = document.createElement("div");
+    card.classList.add("user-card");
+
+    card.innerHTML = `
+      <img src="${user.image}" alt="${user.name}">
+      <h2>${user.name}</h2>
+      <p><strong>Company:</strong> ${user.company}</p>
+      <p><strong>Job Title:</strong> ${user.job_title}</p>
+      <p><strong>Email:</strong> ${user.email}</p>
+      <p><strong>Years Employed:</strong> ${user.years_employed}</p>
+    `;
+    userContainer.appendChild(card);
+  });
 }
 
-function clearCards() {
-  container.innerHTML = '';
+// Remove all cards
+function clearUsers() {
+  userContainer.innerHTML = "";
 }
 
-document.getElementById('showAllBtn').addEventListener('click', async () => {
-  clearCards();
-  const users = await fetchUsers();
-  users?.forEach(createCard);
-});
-
-document.getElementById('filteredBtn').addEventListener('click', async () => {
-  clearCards();
-  const users = await fetchUsers();
-  users
-    ?.filter(user => user.company.years_employed < 10)
-    .forEach(createCard);
-});
-
-document.getElementById('clearBtn').addEventListener('click', clearCards);
+// Event Listeners
+getUsersBtn.addEventListener("click", () => fetchUsers(false));
+getFilteredUsersBtn.addEventListener("click", () => fetchUsers(true));
+clearUsersBtn.addEventListener("click", clearUsers);
 
