@@ -5,14 +5,14 @@ const clearUsersBtn = document.getElementById("clearUsers");
 
 const DATA_URL = "https://dan-collins-dev.github.io/dummy-data-fetching-repo/data/users.json";
 
-
+// Fetch and render users
 async function fetchUsers(filterTenYears = false) {
   try {
     const response = await fetch(DATA_URL);
     if (!response.ok) throw new Error("Network response was not ok");
     const users = await response.json();
 
-    
+    // Optional filtering
     const filteredUsers = filterTenYears
       ? users.filter(user => user.years_employed < 10)
       : users;
@@ -20,10 +20,12 @@ async function fetchUsers(filterTenYears = false) {
     displayUsers(filteredUsers);
   } catch (error) {
     console.error("Fetch error:", error);
+    console.error("Fetch error:", error);
   }
 }
 
 
+// Dynamically create user cards
 function displayUsers(users) {
   clearUsers();
   users.forEach(user => {
@@ -42,13 +44,14 @@ function displayUsers(users) {
   });
 }
 
-
+// Remove all cards
 function clearUsers() {
   userContainer.innerHTML = "";
 }
 
-
+// Event Listeners
 getUsersBtn.addEventListener("click", () => fetchUsers(false));
 getFilteredUsersBtn.addEventListener("click", () => fetchUsers(true));
 clearUsersBtn.addEventListener("click", clearUsers);
+
 
